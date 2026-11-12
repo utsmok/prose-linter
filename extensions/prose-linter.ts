@@ -10,11 +10,12 @@
 // a threshold, attaches a short coaching note to the next provider request.
 // /deslop lints the last assistant message on demand and prints a report.
 //
-// Always-on: on every agent start, injects the writing skill
-// (../skills/writing/SKILL.md, resolved relative to this file) into the
-// system prompt, ponytail-style, so every session writes under the rules even
-// in tool-free turns the passive linter cannot see. Skips silently when the
-// skill is not installed.
+// Always-on: on every agent start, injects the condensed system-prompt rules
+// (../skills/writing/SYSTEM_PROMPT.md, resolved relative to this file) into
+// the system prompt, ponytail-style, so every session writes under the rules
+// even in tool-free turns the passive linter cannot see. Falls back to the
+// full SKILL.md when the condensed file is absent, and skips silently when
+// neither is installed.
 //
 // Tests: tests/prose-linter.test.ts (bun tests/prose-linter.test.ts).
 //
@@ -315,17 +316,28 @@ export default function proseLinter(pi: ExtensionAPI): void {
 	let lastNudged = 0;
 	let skillText: string | undefined;
 
-	// Always-on style injection (the ponytail mechanism): append the writing
-	// skill to the system prompt on every agent start.
+	// Always-on style injection (the ponytail mechanism): append the
+	// condensed writing rules to the system prompt on every agent start.
+	// Prefer a named section when omp supports it, so this extension's block
+	// stays stable for prefix caching when other extensions change theirs.
 	pi.on("before_agent_start", async event => {
 		if (skillText === undefined) {
 			try {
-				skillText = await Bun.file(new URL("../skills/writing/SKILL.md", import.meta.url)).text();
+				skillText = await Bun.file(new URL("../skills/writing/SYSTEM_PROMPT.md", import.meta.url)).text();
 			} catch {
-				skillText = ""; // skill not installed; skip injection
+				try {
+					skillText = await Bun.file(new URL("../skills/writing/SKILL.md", import.meta.url)).text();
+				} catch {
+					skillText = ""; // skill not installed; skip injection
+				}
 			}
 		}
 		if (!skillText) return undefined;
+		const sections = event?.systemPromptOptions?.sections;
+		if (sections && typeof sections === "object") {
+			sections.writing = skillText;
+			return undefined;
+		}
 		const base = event?.systemPrompt;
 		if (Array.isArray(base)) return { systemPrompt: [...base, skillText] };
 		return { systemPrompt: base ? `${base}\n\n${skillText}` : skillText };

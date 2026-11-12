@@ -48,5 +48,13 @@ check("long sentence: flags >45 words", lint(longSentence).some(x => x.rule === 
 // --- prepForLint strips code -------------------------------------------------
 check("prep: strips fences and inline code", !/delve|cache/.test(prepForLint("a `cache` b\n```\ndelve\n```")));
 
+// --- System prompt stays condensed -------------------------------------------
+import { statSync } from "node:fs";
+const skillPath = new URL("../skills/writing/SKILL.md", import.meta.url).pathname;
+const sysPath = new URL("../skills/writing/SYSTEM_PROMPT.md", import.meta.url).pathname;
+const skillBytes = statSync(skillPath).size;
+const sysBytes = statSync(sysPath).size;
+check("SYSTEM_PROMPT.md exists and stays condensed (<4KB; full skill is 9.5KB)", sysBytes > 500 && sysBytes < 4000, `${sysBytes}B vs full ${skillBytes}B`);
+
 console.log(failures === 0 ? "\nALL PASS" : `\n${failures} FAILURES`);
 process.exit(failures === 0 ? 0 : 1);

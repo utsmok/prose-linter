@@ -35,10 +35,12 @@ cp -r prose-linter/skills/writing ~/.omp/agent/skills/
 The extension auto-loads on the next omp session and does three things:
 
 1. **Always-on style injection (the ponytail mechanism).** On every agent
-   start it appends `skills/writing/SKILL.md` to the system prompt, so every
+   start it appends `skills/writing/SYSTEM_PROMPT.md`, a condensed version of
+   the rules (about 800 tokens per request), to the system prompt, so every
    session writes under the rules, including tool-free turns. It resolves the
-   skill relative to itself (`../skills/writing/SKILL.md`), so install both
-   parts; without the skill it skips silently.
+   skill relative to itself (`../skills/writing/`), falls back to the full
+   `SKILL.md` when the condensed file is absent, and skips silently when
+   neither is installed.
 2. **Passive linting.** After each tool result it checks the latest assistant
    prose and, at two or more findings, attaches a coaching note to the next
    model request, at most once per 10 minutes.
@@ -47,7 +49,8 @@ The extension auto-loads on the next omp session and does three things:
 Verify: start a new session, ask it to quote the first line of its prose
 style guide (it should answer "One goal: a tired engineer understands it on
 the first read."), write some prose, call a tool, and watch for the "Prose
-lint" note, or run `/deslop` after a long reply.
+lint" note, or run `/deslop` after a long reply. A test guard keeps the
+condensed prompt under budget: `bun prose-linter/tests/prose-linter.test.ts`.
 
 ### Alternative: rules file instead of injection
 

@@ -95,40 +95,67 @@ shorter one categorically. You should pick the one that is easier to parse.
     "**Performance:** Performance improved" inline-header bullets to prose.
     A bold lead-in naming the item with genuinely new detail is fine.
 
+## Substance
+
+22. **Build an argument, not a description.** A claim with support reads as
+    human work; a string of true-sounding statements reads as filler. State
+    the claim, what motivates it, how it is tested, what alternatives were
+    ruled out, and where it stops. Generic prose that merely sounds right is
+    the strongest content-level tell: writing trained adversarially against
+    expert judges fooled grant reviewers only once it argued this way, not by
+    polishing sentences (Bou et al., "Learning to Reason from Reference
+    Samples Alone", arXiv:2610.38851).
+    Before: The system improves reliability through multiple innovations.
+    After: Retries cut the failure rate from 5% to 1%; the remaining 1% is
+    clock drift, which we do not address.
+23. **Apply the any-document test.** If a sentence could appear unchanged in
+    another project's document, it says nothing about this one. Replace it
+    with the specific name, number, or decision that only this document
+    contains. The same applies across documents: sections written from one
+    template, with only the topic swapped, collapse into machine sameness.
+    Watch the deeper version too: wording that varies while the underlying
+    argument stays identical is the same collapse in disguise.
+
 ## Patterns to avoid
 
-22. **No negative parallelism.** Never "not just X, but Y" or "isn't just X,
+24. **No negative parallelism.** Never "not just X, but Y" or "isn't just X,
     it's Y". State what the thing is.
-23. **No fake agency for inanimate things.** Person-only verbs (expects,
+25. **No fake agency for inanimate things.** Person-only verbs (expects,
     wants, promises, forgets) take people, not systems. "The docstring
     promises" becomes "the docstring says". "The API returns JSON" is fine;
     novel personification ("chaos expects you to remember") is not.
-24. **No verbs coined from nouns.** "Calendar it" becomes "put it on the
+26. **No verbs coined from nouns.** "Calendar it" becomes "put it on the
     calendar"; "footnote it" becomes "add a footnote".
-25. **No stacks of three or more bare nouns.** "parser config file format"
+27. **No stacks of three or more bare nouns.** "parser config file format"
     forces the reader to guess the grouping; break the chain with "of" or
     "for".
-26. **No rule of three, synonym cycling, or false ranges.** Use the natural
+28. **No rule of three, synonym cycling, or false ranges.** Use the natural
     number of items; repeat one term instead of cycling synonyms; list topics
     directly instead of "from X to Y".
-27. **No superficial -ing phrases** ("highlighting...", "ensuring...") and no
+29. **No superficial -ing phrases** ("highlighting...", "ensuring...") and no
     vague attributions ("experts believe"). Name the source or cut it.
-28. **No dashes as connectors.** Em and en dashes are out, including in number
+30. **No dashes as connectors.** Em and en dashes are out, including in number
     ranges ("10 to 20"). Clauses join with a period or "and".
-29. **Colons only to introduce lists or as short labels** ("Summary:"). Not as
+31. **Colons only to introduce lists or as short labels** ("Summary:"). Not as
     mid-sentence connectors.
-30. **No analogies, imagery, or mannered prose.** Describe the thing in
+32. **No analogies, imagery, or mannered prose.** Describe the thing in
     literal terms. No aphorisms, rhetorical fragments, or stock framing.
-31. **No demonstrative openers.** Don't start a sentence with "This" or "That"
+33. **No demonstrative openers.** Don't start a sentence with "This" or "That"
     carrying unstated context, and don't open a paragraph with one. Name the
     thing: "The agent applies the rules on the next turn."
-32. **No chatbot phrases or sycophancy.** "I hope this helps!", "Let me know
+34. **No chatbot phrases or sycophancy.** "I hope this helps!", "Let me know
     if...", "Great question!" are out. Respond directly.
-33. **No hedging piles or generic conclusions.** "Could potentially possibly"
+35. **No hedging piles or generic conclusions.** "Could potentially possibly"
     is "may". "The future looks bright" becomes the specific plan.
 
 ## Process
 
-34. **Draft, then self-lint against this list**, and run `/deslop` (the
+36. **Draft, then self-lint against this list**, and run `/deslop` (the
     prose-linter extension) on long replies when available. Fix meaning first,
     then compression: every rule above yields to clarity when they conflict.
+37. **Report what you actually did.** In the RAL experiments, judges never
+    saw the model's reasoning, yet reasoning quality still showed in the
+    writing: hollow reasoning produced detectable prose, and reasoning that
+    worked produced convincing prose. The same holds for you: polish cannot
+    rescue text that reports work nobody did. Do the substantive work first,
+    then write down what happened.

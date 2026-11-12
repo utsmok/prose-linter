@@ -83,3 +83,11 @@ bun tests/prose-linter.test.ts
 
 Clark, T. H., Martin, M. B., & Mahowald, K. (2026). Why is AI-generated
 language so hard to understand? arXiv:2610.29162.
+
+Bou, A., et al. (2026). Learning to Reason from Reference Samples Alone:
+Reinforced Adversarial Learning for Modern LLM Post-Training.
+[arXiv:2610.38851](https://arxiv.org/abs/2610.38851) ([post](https://advances.edisonscientific.com/research/reinforced-adversarial-learning/)).
+Its NIH-grant experiments are the source of the master skill's Substance
+rules, and they carry a warning the syntax rules cannot: LLM judges caught
+the adversarially trained text at rates humans missed, so fixing surface
+tells is necessary but not sufficient.

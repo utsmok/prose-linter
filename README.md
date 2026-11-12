@@ -27,57 +27,71 @@ Requires [omp](https://github.com/oh-my-pi/omp) and [bun](https://bun.sh).
 
 ```sh
 git clone https://github.com/utsmok/prose-linter
+mkdir -p ~/.omp/agent/extensions ~/.omp/agent/skills
 cp prose-linter/extensions/prose-linter.ts ~/.omp/agent/extensions/
-```
-
-The extension auto-loads on the next omp session. Nothing else is required for
-the linter. Verify with `bun prose-linter/tests/prose-linter.test.ts`, or in a
-session: write some deliberately slopped prose, call any tool, and watch for
-the "Prose lint" note, or run `/deslop` after a long reply.
-
-### Optional: install the master skill
-
-```sh
 cp -r prose-linter/skills/writing ~/.omp/agent/skills/
 ```
 
-This adds a standalone `writing` skill (trigger it by asking to draft or
-deslop prose). It is a condensed merge of the plain-writing, unslop, and
-technical-writing skills plus the paper's findings, so it also works without
-those skills installed. If you only want the paper rules in an existing unslop
-skill instead, append `unslop-rules.md` to
-`~/.omp/agent/skills/unslop/SKILL.md`.
+The extension auto-loads on the next omp session and does three things:
 
-## Behavior
+1. **Always-on style injection (the ponytail mechanism).** On every agent
+   start it appends `skills/writing/SKILL.md` to the system prompt, so every
+   session writes under the rules, including tool-free turns. It resolves the
+   skill relative to itself (`../skills/writing/SKILL.md`), so install both
+   parts; without the skill it skips silently.
+2. **Passive linting.** After each tool result it checks the latest assistant
+   prose and, at two or more findings, attaches a coaching note to the next
+   model request, at most once per 10 minutes.
+3. **The `/deslop` command** lints the last assistant message on demand.
 
-Passive mode: after each tool result, the linter checks the latest assistant
-prose (code fences, inline code, and links stripped first). At two or more
-findings it attaches a short coaching note to the next model request, at most
-once per 10 minutes. Findings cite the merged rule numbers, so the note reads
-as a checklist, not a scolding.
+Verify: start a new session, ask it to quote the first line of its prose
+style guide (it should answer "One goal: a tired engineer understands it on
+the first read."), write some prose, call a tool, and watch for the "Prose
+lint" note, or run `/deslop` after a long reply.
 
-`/deslop`: lints the last assistant message on demand and prints every finding
-with a suggested fix.
+### Alternative: rules file instead of injection
 
-Checks: missing complementizer and relative "that", reduced "so that",
-reduced-relative density, denominal coinages, noun stacks (three or more bare
-nouns), person-only verbs on inanimate subjects, sentences over 45 words, AI
-vocabulary, negative parallelism, em dash piles.
+The system-prompt injection costs roughly 2.5k tokens per request. If you
+prefer the cheaper mechanism that omp's plain-writing rule uses, copy the
+pointer rule instead and skip the extension:
+
+```sh
+mkdir -p ~/.omp/agent/rules
+cp prose-linter/rules/writing.md ~/.omp/agent/rules/
+```
+
+The rule loads on every session and tells the model to read the writing skill
+on first use. You lose mechanical enforcement (the passive lint and
+`/deslop`), which is why the extension route is recommended.
+
+### If you already run the plain-writing rule
+
+The master skill merges plain-writing, unslop, and technical-writing, so
+keeping the old `rules/plain-writing.md` pointer active means two style
+authorities per reply. Edit it down to a deferral or set `alwaysApply: false`:
+
+```sh
+cp prose-linter/rules/plain-writing.deferred.md ~/.omp/agent/rules/plain-writing.md
+```
+
+### Tests
+
+```sh
+bun prose-linter/tests/prose-linter.test.ts
+```
 
 ## Limits
 
-- Tool-free turns (pure prose, no tool calls) get no passive lint; `/deslop`
-  covers those.
 - The checks are regex heuristics. They favor false positives over misses,
   and the passive note is advisory: it never rewrites output.
-- Rule 38 of the merged skill (prefer known phrasings) is a judgment call, not
-  mechanized.
-
-## Test
-
-```sh
-bun tests/prose-linter.test.ts
-```
+- The passive lint needs a tool call to fire; the system-prompt injection
+  covers tool-free turns instead.
+- Rule 38 of the merged skill (prefer known phrasings) is a judgment call,
+  not mechanized, and so are the Substance rules (argument shape, the
+  any-document test). Those live in the skill, not the linter.
+- Machines detect more than people do: in the RAL study, LLM judges caught
+  adversarially trained text at 35% while human experts managed only 55%.
+  Follow the rules; do not assume polish is enough.
 
 ## Citation
 

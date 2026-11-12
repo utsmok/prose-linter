@@ -10,8 +10,12 @@
 // a threshold, attaches a short coaching note to the next provider request.
 // /deslop lints the last assistant message on demand and prints a report.
 //
-// Known limit: tool-free turns (pure prose replies with no tool calls) get no
-// passive lint; use /deslop for those, or upgrade to the "context" event.
+// Always-on: on every agent start, injects the writing skill
+// (../skills/writing/SKILL.md, resolved relative to this file) into the
+// system prompt, ponytail-style, so every session writes under the rules even
+// in tool-free turns the passive linter cannot see. Skips silently when the
+// skill is not installed.
+//
 // Tests: tests/prose-linter.test.ts (bun tests/prose-linter.test.ts).
 //
 // Loaded from ~/.omp/agent/extensions (loose extension file).
@@ -309,6 +313,23 @@ function renderNote(findings: Finding[]): string {
 
 export default function proseLinter(pi: ExtensionAPI): void {
 	let lastNudged = 0;
+	let skillText: string | undefined;
+
+	// Always-on style injection (the ponytail mechanism): append the writing
+	// skill to the system prompt on every agent start.
+	pi.on("before_agent_start", async event => {
+		if (skillText === undefined) {
+			try {
+				skillText = await Bun.file(new URL("../skills/writing/SKILL.md", import.meta.url)).text();
+			} catch {
+				skillText = ""; // skill not installed; skip injection
+			}
+		}
+		if (!skillText) return undefined;
+		const base = event?.systemPrompt;
+		if (Array.isArray(base)) return { systemPrompt: [...base, skillText] };
+		return { systemPrompt: base ? `${base}\n\n${skillText}` : skillText };
+	});
 
 	pi.on("tool_result", async (_event, ctx) => {
 		const branch = ctx.sessionManager.getBranch();
